@@ -53,10 +53,4 @@ El proyecto está construido siguiendo los principios de Clean Architecture, sep
 *   **Buenas Prácticas**: Adhesión a las guías de estilo y patrones de diseño recomendados.
 *   **UI Moderna**: Interfaz de usuario minimalista, intuitiva y accesible.
 
-## Cómo Contribuir (Opcional - si aplica)
-
-*(Esta sección puede ser añadida más adelante si el proyecto se vuelve open source o si se busca colaboración)*
-
----
-
 *Este README se actualizará a medida que el proyecto evolucione.*
