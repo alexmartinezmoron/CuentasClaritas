@@ -1,5 +1,4 @@
 # CuentasClaritas
-# CuentasClaritas
 
 ## Descripción del Proyecto
 
