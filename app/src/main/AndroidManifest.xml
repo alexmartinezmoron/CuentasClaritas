@@ -5,6 +5,11 @@
     <!-- Permiso para acceder a la cámara -->
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Permiso para acceder a imágenes de la galería (Android 13+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Permiso para acceder a almacenamiento externo (Android <=12) -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+
     <!-- Indicar que la cámara SI es obligatoria -->
     <uses-feature android:name="android.hardware.camera" android:required="true" />
 

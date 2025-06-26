@@ -12,11 +12,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.amartinez.cuentasclaritas.navigation.AppScreen
 import com.amartinez.cuentasclaritas.navigation.drawerItems
 import com.amartinez.cuentasclaritas.presentation.scanticket.ScanTicketScreen
 import com.amartinez.cuentasclaritas.presentation.settings.SettingsScreen
 import com.amartinez.cuentasclaritas.presentation.ticketlist.TicketListScreen
+import com.amartinez.cuentasclaritas.presentation.tickettext.TicketTextScreen
+import java.net.URLEncoder
+import java.net.URLDecoder
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,12 +110,19 @@ fun AppNavHost(
         modifier = modifier
     ) {
         composable(AppScreen.ScanTicket.route) {
-            ScanTicketScreen(
-                onTicketScanned = {
-                    // TODO: Navigate to a ticket detail screen or process the bitmap
-                    // For now, it could navigate to the list, for example:
-                    // navController.navigate(AppScreen.TicketList.route)
+            val viewModel = androidx.hilt.navigation.compose.hiltViewModel<com.amartinez.cuentasclaritas.presentation.scanticket.ScanTicketViewModel>()
+            val recognizedText by viewModel.recognizedText.collectAsState()
+            // Navegación automática cuando hay texto reconocido
+            LaunchedEffect(recognizedText) {
+                if (!recognizedText.isNullOrBlank()) {
+                    val encodedText = URLEncoder.encode(recognizedText, "UTF-8")
+                    navController.navigate("ticket_text/$encodedText")
+                    viewModel.clearCapturedImage() // Limpia para evitar navegación repetida
                 }
+            }
+            ScanTicketScreen(
+                viewModel = viewModel,
+                onTicketScanned = { viewModel.onImageCaptured(it) }
             )
         }
         composable(AppScreen.TicketList.route) {
@@ -118,6 +130,20 @@ fun AppNavHost(
         }
         composable(AppScreen.Settings.route) {
             SettingsScreen()
+        }
+        composable(
+            route = AppScreen.TicketText.route,
+            arguments = listOf(navArgument("ticketText") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val ticketText = backStackEntry.arguments?.getString("ticketText")?.let {
+                URLDecoder.decode(it, "UTF-8")
+            } ?: "Sin texto extraído"
+            TicketTextScreen(
+                ticketText = ticketText,
+                onBackToScan = {
+                    navController.popBackStack(AppScreen.ScanTicket.route, inclusive = false)
+                }
+            )
         }
     }
 }
