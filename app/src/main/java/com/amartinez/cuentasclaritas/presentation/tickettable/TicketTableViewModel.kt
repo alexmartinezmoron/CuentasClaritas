@@ -27,6 +27,9 @@ class TicketTableViewModel @Inject constructor(
     private val _totalExtracted = MutableStateFlow<Double?>(null)
     val totalExtracted: StateFlow<Double?> = _totalExtracted.asStateFlow()
 
+    private val _showSavedAlert = MutableStateFlow(false)
+    val showSavedAlert: StateFlow<Boolean> = _showSavedAlert.asStateFlow()
+
     init {
         val text = savedStateHandle.get<String>("ticketText") ?: ""
         processText(text)
@@ -114,13 +117,17 @@ class TicketTableViewModel @Inject constructor(
 
     fun onSaveTicketAndProducts() {
         viewModelScope.launch {
-            // Datos por defecto para el ticket
             val ticket = TicketEntity(
                 storeName = "Tienda genérica",
                 date = System.currentTimeMillis(),
                 totalAmount = _totalExtracted.value ?: _products.value.sumOf { it.quantity * it.unitPrice }
             )
             saveTicketWithProductsUseCase(ticket, _products.value)
+            _showSavedAlert.value = true
         }
+    }
+
+    fun dismissSavedAlert() {
+        _showSavedAlert.value = false
     }
 }

@@ -148,6 +148,7 @@ fun AppNavHost(
             val tableViewModel = androidx.hilt.navigation.compose.hiltViewModel<TicketTableViewModel>()
             val products by tableViewModel.products.collectAsState()
             val totalExtracted by tableViewModel.totalExtracted.collectAsState()
+            val showSavedAlert by tableViewModel.showSavedAlert.collectAsState()
             TicketTableScreen(
                 products = products,
                 onProductChange = tableViewModel::updateProduct,
@@ -157,7 +158,9 @@ fun AppNavHost(
                 },
                 onAddProduct = { tableViewModel.addProduct() },
                 onRemoveProduct = { tableViewModel.removeProduct(it) },
-                onSaveProducts = { tableViewModel.onSaveTicketAndProducts() }
+                onSaveProducts = { tableViewModel.onSaveTicketAndProducts() },
+                showSavedAlert = showSavedAlert,
+                onDismissSavedAlert = { tableViewModel.dismissSavedAlert() }
             )
         }
     }

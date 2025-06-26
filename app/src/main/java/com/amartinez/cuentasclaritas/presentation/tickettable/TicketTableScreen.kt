@@ -27,6 +27,13 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import java.util.Locale
+import com.amartinez.cuentasclaritas.presentation.ui.common.SimpleAlertDialog
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.launch
 
 @Composable
 fun TicketTableScreen(
@@ -34,100 +41,121 @@ fun TicketTableScreen(
     onProductChange: (Int, TicketProduct) -> Unit,
     totalExtracted: Double?,
     onBackToScan: () -> Unit,
-    onAddProduct: () -> Unit, // NUEVO
-    onRemoveProduct: (Int) -> Unit, // NUEVO
-    onSaveProducts: () -> Unit // NUEVO
+    onAddProduct: () -> Unit,
+    onRemoveProduct: (Int) -> Unit,
+    onSaveProducts: () -> Unit,
+    showSavedAlert: Boolean,
+    onDismissSavedAlert: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("Productos del ticket:", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-        }
-        Spacer(modifier = Modifier.height(8.dp))
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-        // Encabezados de la tabla
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Cant.", modifier = Modifier.width(60.dp), style = MaterialTheme.typography.labelMedium)
-            Text("Producto", modifier = Modifier.weight(1f), style = MaterialTheme.typography.labelMedium)
-            Text("P. Unit", modifier = Modifier.width(80.dp), style = MaterialTheme.typography.labelMedium)
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
-
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 4.dp)
-        ) {
-            itemsIndexed(products) { index, product ->
-                ProductRow(
-                    product = product,
-                    onProductChange = { updated -> onProductChange(index, updated) },
-                    onRemove = { onRemoveProduct(index) }
-                )
-                HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+    // Mostrar Snackbar cuando showSavedAlert sea true
+    LaunchedEffect(showSavedAlert) {
+        if (showSavedAlert) {
+            scope.launch {
+                snackbarHostState.showSnackbar("Guardado correctamente")
+                onDismissSavedAlert()
             }
-            item {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    IconButton(onClick = onAddProduct) {
-                        Icon(Icons.Default.Add, contentDescription = "Agregar producto")
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("Productos del ticket:", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Encabezados de la tabla
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Cant.", modifier = Modifier.width(60.dp), style = MaterialTheme.typography.labelMedium)
+                Text("Producto", modifier = Modifier.weight(1f), style = MaterialTheme.typography.labelMedium)
+                Text("P. Unit", modifier = Modifier.width(80.dp), style = MaterialTheme.typography.labelMedium)
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 4.dp)
+            ) {
+                itemsIndexed(products) { index, product ->
+                    ProductRow(
+                        product = product,
+                        onProductChange = { updated -> onProductChange(index, updated) },
+                        onRemove = { onRemoveProduct(index) }
+                    )
+                    HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+                }
+                item {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        IconButton(onClick = onAddProduct) {
+                            Icon(Icons.Default.Add, contentDescription = "Agregar producto")
+                        }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        val totalCalculated = products.sumOf { it.quantity * it.unitPrice }
+            val totalCalculated = products.sumOf { it.quantity * it.unitPrice }
 
-        Text(
-            "Total productos: %.2f €".format(totalCalculated),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.align(Alignment.End)
-        )
+            Text(
+                "Total productos: %.2f €".format(totalCalculated),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.End)
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            "Total extraído del ticket: ${totalExtracted?.let { String.format(Locale.getDefault(), "%.2f", it) } ?: "-"} €",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.align(Alignment.End)
-        )
+            Text(
+                "Total extraído del ticket: ${totalExtracted?.let { String.format(Locale.getDefault(), "%.2f", it) } ?: "-"} €",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.End)
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(
-                onClick = onSaveProducts, // Este callback ahora debe llamar a onSaveTicketAndProducts
-                modifier = Modifier.weight(1f)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Icon(Icons.Default.Save, contentDescription = "Guardar")
-                Spacer(Modifier.width(8.dp))
-                Text("Guardar")
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Button(
-                onClick = onBackToScan,
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(Icons.Default.CameraAlt, contentDescription = "Volver a escanear")
-                Spacer(Modifier.width(8.dp))
-                Text("Volver a escanear")
+                Button(
+                    onClick = onSaveProducts, // Este callback ahora debe llamar a onSaveTicketAndProducts
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Save, contentDescription = "Guardar")
+                    Spacer(Modifier.width(8.dp))
+                    Text("Guardar")
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Button(
+                    onClick = onBackToScan,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = "Volver a escanear")
+                    Spacer(Modifier.width(8.dp))
+                    Text("Volver a escanear")
+                }
             }
         }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.TopCenter) // Cambiado a la parte superior
+        )
     }
 }
 
