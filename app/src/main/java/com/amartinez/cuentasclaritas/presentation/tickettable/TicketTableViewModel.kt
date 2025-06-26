@@ -115,15 +115,16 @@ class TicketTableViewModel @Inject constructor(
         throw UnsupportedOperationException("Usa onSaveTicketAndProducts() para guardar productos asociados a un ticket")
     }
 
-    fun onSaveTicketAndProducts() {
+    fun onSaveTicketAndProducts(onTicketSaved: (Long) -> Unit) {
         viewModelScope.launch {
             val ticket = TicketEntity(
                 storeName = "Tienda genérica",
                 date = System.currentTimeMillis(),
                 totalAmount = _totalExtracted.value ?: _products.value.sumOf { it.quantity * it.unitPrice }
             )
-            saveTicketWithProductsUseCase(ticket, _products.value)
+            val ticketId = saveTicketWithProductsUseCase(ticket, _products.value)
             _showSavedAlert.value = true
+            onTicketSaved(ticketId)
         }
     }
 

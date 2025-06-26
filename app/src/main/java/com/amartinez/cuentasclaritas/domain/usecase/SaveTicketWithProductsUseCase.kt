@@ -10,9 +10,9 @@ class SaveTicketWithProductsUseCase @Inject constructor(
     private val ticketRepository: TicketRepository,
     private val productRepository: ProductRepository
 ) {
-    suspend operator fun invoke(ticket: TicketEntity, products: List<TicketProduct>) {
+    suspend operator fun invoke(ticket: TicketEntity, products: List<TicketProduct>): Long {
         val ticketId = ticketRepository.insertTicket(ticket)
         productRepository.saveProducts(products, ticketId)
+        return ticketId
     }
 }
-

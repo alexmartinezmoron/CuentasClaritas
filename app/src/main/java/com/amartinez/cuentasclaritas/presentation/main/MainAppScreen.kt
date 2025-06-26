@@ -22,9 +22,6 @@ import com.amartinez.cuentasclaritas.presentation.settings.SettingsScreen
 import com.amartinez.cuentasclaritas.presentation.ticketlist.TicketListScreen
 import com.amartinez.cuentasclaritas.presentation.tickettable.TicketTableScreen
 import com.amartinez.cuentasclaritas.presentation.tickettable.TicketTableViewModel
-// Removed unused import: com.amartinez.cuentasclaritas.presentation.tickettext.TicketTextScreen
-// Removed unused import: java.net.URLEncoder
-// Removed unused import: java.net.URLDecoder
 import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 
@@ -144,11 +141,20 @@ fun AppNavHost(
                 // Use Base64 decoding
                 String(Base64.decode(it, Base64.URL_SAFE or Base64.NO_WRAP), StandardCharsets.UTF_8)
             } ?: ""
-            // ViewModel de la tabla (usar Hilt para inyección)
             val tableViewModel = androidx.hilt.navigation.compose.hiltViewModel<TicketTableViewModel>()
             val products by tableViewModel.products.collectAsState()
             val totalExtracted by tableViewModel.totalExtracted.collectAsState()
             val showSavedAlert by tableViewModel.showSavedAlert.collectAsState()
+            var navigateToUserRegistration by remember { mutableStateOf<Long?>(null) }
+
+            if (navigateToUserRegistration != null) {
+                // Navegar a la pantalla de alta de usuarios pasando el ticketId
+                LaunchedEffect(navigateToUserRegistration) {
+                    navController.navigate("user_registration/${navigateToUserRegistration}")
+                    navigateToUserRegistration = null
+                }
+            }
+
             TicketTableScreen(
                 products = products,
                 onProductChange = tableViewModel::updateProduct,
@@ -158,9 +164,73 @@ fun AppNavHost(
                 },
                 onAddProduct = { tableViewModel.addProduct() },
                 onRemoveProduct = { tableViewModel.removeProduct(it) },
-                onSaveProducts = { tableViewModel.onSaveTicketAndProducts() },
+                onSaveProducts = {
+                    tableViewModel.onSaveTicketAndProducts { ticketId ->
+                        navigateToUserRegistration = ticketId
+                    }
+                },
                 showSavedAlert = showSavedAlert,
                 onDismissSavedAlert = { tableViewModel.dismissSavedAlert() }
+            )
+        }
+        // Pantalla de alta de usuarios
+        composable(
+            route = "user_registration/{ticketId}",
+            arguments = listOf(navArgument("ticketId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val ticketId = backStackEntry.arguments?.getLong("ticketId") ?: -1L
+            val userRegistrationViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.amartinez.cuentasclaritas.presentation.userassignment.UserRegistrationViewModel>()
+            val users by userRegistrationViewModel.users.collectAsState()
+            var navigateToAssignment by remember { mutableStateOf(false) }
+
+            if (navigateToAssignment) {
+                // Navega a la pantalla de asignación de productos
+                LaunchedEffect(ticketId) {
+                    navController.navigate("product_assignment/$ticketId")
+                }
+            }
+
+            com.amartinez.cuentasclaritas.presentation.userassignment.UserRegistrationScreen(
+                users = users,
+                onUserNameChange = userRegistrationViewModel::onUserNameChange,
+                onAddUser = userRegistrationViewModel::onAddUser,
+                onRemoveUser = userRegistrationViewModel::onRemoveUser,
+                onSaveUsers = {
+                    userRegistrationViewModel.saveUsers {
+                        navigateToAssignment = true
+                    }
+                }
+            )
+        }
+        // Pantalla de asignación de productos a usuarios
+        composable(
+            route = "product_assignment/{ticketId}",
+            arguments = listOf(navArgument("ticketId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val ticketId = backStackEntry.arguments?.getLong("ticketId") ?: -1L
+            val assignmentViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.amartinez.cuentasclaritas.presentation.userassignment.ProductAssignmentViewModel>()
+            val users by assignmentViewModel.users.collectAsState()
+            val products by assignmentViewModel.products.collectAsState()
+            val assignments by assignmentViewModel.assignments.collectAsState()
+            val saveSuccess by assignmentViewModel.saveSuccess.collectAsState()
+
+            if (saveSuccess) {
+                // Aquí podrías navegar a otra pantalla o mostrar un mensaje de éxito
+                // navController.popBackStack(AppScreen.TicketList.route, false)
+            }
+
+            com.amartinez.cuentasclaritas.presentation.userassignment.ProductAssignmentScreen(
+                users = users.map { it.name },
+                products = products,
+                assignments = users.associate { user ->
+                    user.name to (assignments[user.userId] ?: emptyList())
+                },
+                onAssignProduct = { userName, productName ->
+                    val user = users.find { it.name == userName }
+                    user?.let { assignmentViewModel.onAssignProduct(it.userId, productName) }
+                },
+                onSaveAssignments = { assignmentViewModel.saveAssignments() },
+                isAssignmentValid = assignmentViewModel.isAssignmentValid()
             )
         }
     }
