@@ -41,6 +41,12 @@ sealed class AppScreen(
         title = "Texto del Ticket",
         icon = null
     )
+
+    object TicketTable : AppScreen(
+        route = "ticket_table/{ticketText}",
+        title = "Productos del Ticket",
+        icon = null
+    )
 }
 
 /**
@@ -50,5 +56,5 @@ val drawerItems = listOf(
     AppScreen.ScanTicket,
     AppScreen.TicketList,
     AppScreen.Settings
-    // No agregamos TicketText aquí porque no es parte del drawer
+    // No agregamos TicketText ni TicketTable aquí porque no son parte del drawer
 )

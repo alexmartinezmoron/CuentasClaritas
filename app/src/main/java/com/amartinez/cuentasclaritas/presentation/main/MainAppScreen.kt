@@ -1,6 +1,7 @@
 package com.amartinez.cuentasclaritas.presentation.main
 
 import android.annotation.SuppressLint
+import android.util.Base64 // Added for Base64 encoding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,10 +20,13 @@ import com.amartinez.cuentasclaritas.navigation.drawerItems
 import com.amartinez.cuentasclaritas.presentation.scanticket.ScanTicketScreen
 import com.amartinez.cuentasclaritas.presentation.settings.SettingsScreen
 import com.amartinez.cuentasclaritas.presentation.ticketlist.TicketListScreen
-import com.amartinez.cuentasclaritas.presentation.tickettext.TicketTextScreen
-import java.net.URLEncoder
-import java.net.URLDecoder
+import com.amartinez.cuentasclaritas.presentation.tickettable.TicketTableScreen
+import com.amartinez.cuentasclaritas.presentation.tickettable.TicketTableViewModel
+// Removed unused import: com.amartinez.cuentasclaritas.presentation.tickettext.TicketTextScreen
+// Removed unused import: java.net.URLEncoder
+// Removed unused import: java.net.URLDecoder
 import kotlinx.coroutines.launch
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // Scaffold provides padding, but we might not use it directly in the NavHost
@@ -114,9 +118,10 @@ fun AppNavHost(
             val recognizedText by viewModel.recognizedText.collectAsState()
             // Navegación automática cuando hay texto reconocido
             LaunchedEffect(recognizedText) {
-                if (!recognizedText.isNullOrBlank()) {
-                    val encodedText = URLEncoder.encode(recognizedText, "UTF-8")
-                    navController.navigate("ticket_text/$encodedText")
+                val text = recognizedText
+                if (!text.isNullOrBlank()) {
+                    val encodedText = Base64.encodeToString(text.toByteArray(StandardCharsets.UTF_8), Base64.URL_SAFE or Base64.NO_WRAP)
+                    navController.navigate("ticket_table/$encodedText")
                     viewModel.clearCapturedImage() // Limpia para evitar navegación repetida
                 }
             }
@@ -132,17 +137,27 @@ fun AppNavHost(
             SettingsScreen()
         }
         composable(
-            route = AppScreen.TicketText.route,
+            route = AppScreen.TicketTable.route,
             arguments = listOf(navArgument("ticketText") { type = NavType.StringType })
         ) { backStackEntry ->
             val ticketText = backStackEntry.arguments?.getString("ticketText")?.let {
-                URLDecoder.decode(it, "UTF-8")
-            } ?: "Sin texto extraído"
-            TicketTextScreen(
-                ticketText = ticketText,
+                // Use Base64 decoding
+                String(Base64.decode(it, Base64.URL_SAFE or Base64.NO_WRAP), StandardCharsets.UTF_8)
+            } ?: ""
+            // ViewModel de la tabla (usar Hilt para inyección)
+            val tableViewModel = androidx.hilt.navigation.compose.hiltViewModel<TicketTableViewModel>()
+            val products by tableViewModel.products.collectAsState()
+            val totalExtracted by tableViewModel.totalExtracted.collectAsState()
+            TicketTableScreen(
+                products = products,
+                onProductChange = tableViewModel::updateProduct,
+                totalExtracted = totalExtracted,
                 onBackToScan = {
                     navController.popBackStack(AppScreen.ScanTicket.route, inclusive = false)
-                }
+                },
+                onAddProduct = { tableViewModel.addProduct() },
+                onRemoveProduct = { tableViewModel.removeProduct(it) },
+                onSaveProducts = { tableViewModel.onSaveTicketAndProducts() }
             )
         }
     }
