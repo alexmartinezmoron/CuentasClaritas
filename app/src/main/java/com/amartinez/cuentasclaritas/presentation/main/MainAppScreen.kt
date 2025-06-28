@@ -22,8 +22,10 @@ import com.amartinez.cuentasclaritas.presentation.ticketlist.TicketListScreen
 import com.amartinez.cuentasclaritas.presentation.tickettable.TicketTableScreen
 import com.amartinez.cuentasclaritas.presentation.tickettable.TicketTableViewModel
 import com.amartinez.cuentasclaritas.presentation.profile.ProfileScreen
+import com.amartinez.cuentasclaritas.presentation.auth.AuthViewModel
 import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // Scaffold provides padding, but we might not use it directly in the NavHost
@@ -33,24 +35,13 @@ fun MainAppScreen() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Estado para saber si el usuario está autenticado
-    var isAuthenticated by remember { mutableStateOf<Boolean?>(null) }
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
 
-    // Chequeo de autenticación Firebase (incluye anónimo)
-    LaunchedEffect(Unit) {
-        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
-        isAuthenticated = user != null
-    }
-
-    if (isAuthenticated == null) {
-        // Loader mientras se determina el estado
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-    } else if (isAuthenticated == false) {
-        // Pantalla de autenticación
+    if (!isAuthenticated) {
         com.amartinez.cuentasclaritas.presentation.auth.AuthScreen(
-            onAuthSuccess = { isAuthenticated = true }
+            onAuthSuccess = {},
+            viewModel = authViewModel
         )
     } else {
         // App principal con Drawer y NavHost

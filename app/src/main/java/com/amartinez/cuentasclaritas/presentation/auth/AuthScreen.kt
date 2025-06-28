@@ -81,9 +81,6 @@ fun AuthScreen(
             onAuthSuccess()
         }
     }
-    LaunchedEffect(Unit) {
-        viewModel.checkIfAuthenticated()
-    }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Card(
@@ -149,7 +146,7 @@ fun AuthScreen(
                 }
                 Spacer(Modifier.height(8.dp))
                 TextButton(
-                    onClick = { viewModel.loginAnonymously() },
+                    onClick = { viewModel.signInAnonymously() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Continuar sin cuenta")

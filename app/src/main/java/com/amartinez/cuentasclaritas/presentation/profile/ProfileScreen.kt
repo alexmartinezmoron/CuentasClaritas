@@ -119,13 +119,10 @@ fun ProfileScreen(navController: NavController) {
                             FirebaseAuth.getInstance().signOut()
                             Log.d("ProfileScreen", "Sesión cerrada correctamente")
                             isLoading = false
-                            navController.navigate("auth") {
-                                popUpTo(0) { inclusive = true }
-                            }
+                            // El estado de autenticación en MainAppScreen controlará la UI, no navegamos manualmente
                         } catch (e: Exception) {
                             Log.e("ProfileScreen", "Error al cerrar sesión", e)
                             isLoading = false
-                            // Usar una variable de estado para mostrar el mensaje en el SnackbarHost
                             snackbarMessage = context.getString(R.string.logout_error)
                         }
                     }

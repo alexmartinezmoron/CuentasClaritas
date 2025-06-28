@@ -20,9 +20,11 @@ sealed class AuthUiState {
 }
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(
-    private val firebaseAuth: FirebaseAuth
-) : ViewModel() {
+class AuthViewModel @Inject constructor() : ViewModel() {
+    private val auth = FirebaseAuth.getInstance()
+    private val _isAuthenticated = MutableStateFlow(false)
+    val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
+
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
@@ -31,15 +33,14 @@ class AuthViewModel @Inject constructor(
     private val _password = MutableStateFlow("")
     val password: StateFlow<String> = _password.asStateFlow()
 
-    fun onEmailChange(value: String) { _email.value = value }
-    fun onPasswordChange(value: String) { _password.value = value }
-
-    fun checkIfAuthenticated() {
-        val user = firebaseAuth.currentUser
-        if (user != null) {
-            _uiState.value = AuthUiState.Success(user)
+    init {
+        auth.addAuthStateListener { firebaseAuth ->
+            _isAuthenticated.value = firebaseAuth.currentUser != null
         }
     }
+
+    fun onEmailChange(value: String) { _email.value = value }
+    fun onPasswordChange(value: String) { _password.value = value }
 
     fun loginWithEmail() {
         val email = _email.value.trim()
@@ -54,10 +55,10 @@ class AuthViewModel @Inject constructor(
         }
         _uiState.value = AuthUiState.Loading
         viewModelScope.launch {
-            firebaseAuth.signInWithEmailAndPassword(email, password)
+            auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _uiState.value = AuthUiState.Success(firebaseAuth.currentUser)
+                        _uiState.value = AuthUiState.Success(auth.currentUser)
                     } else {
                         _uiState.value = AuthUiState.Error(task.exception?.localizedMessage ?: "Error de autenticación")
                     }
@@ -78,10 +79,10 @@ class AuthViewModel @Inject constructor(
         }
         _uiState.value = AuthUiState.Loading
         viewModelScope.launch {
-            firebaseAuth.createUserWithEmailAndPassword(email, password)
+            auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _uiState.value = AuthUiState.Success(firebaseAuth.currentUser)
+                        _uiState.value = AuthUiState.Success(auth.currentUser)
                     } else {
                         _uiState.value = AuthUiState.Error(task.exception?.localizedMessage ?: "Error de registro")
                     }
@@ -93,10 +94,10 @@ class AuthViewModel @Inject constructor(
         _uiState.value = AuthUiState.Loading
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         viewModelScope.launch {
-            firebaseAuth.signInWithCredential(credential)
+            auth.signInWithCredential(credential)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _uiState.value = AuthUiState.Success(firebaseAuth.currentUser)
+                        _uiState.value = AuthUiState.Success(auth.currentUser)
                     } else {
                         _uiState.value = AuthUiState.Error(task.exception?.localizedMessage ?: "Error con Google Sign-In")
                     }
@@ -104,18 +105,22 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun loginAnonymously() {
+    fun signInAnonymously() {
         _uiState.value = AuthUiState.Loading
         viewModelScope.launch {
-            firebaseAuth.signInAnonymously()
+            auth.signInAnonymously()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _uiState.value = AuthUiState.Success(firebaseAuth.currentUser)
+                        _uiState.value = AuthUiState.Success(auth.currentUser)
                     } else {
                         _uiState.value = AuthUiState.Error(task.exception?.localizedMessage ?: "Error de sesión anónima")
                     }
                 }
         }
+    }
+
+    fun logout() {
+        auth.signOut()
     }
 
     fun clearError() {
@@ -127,4 +132,3 @@ class AuthViewModel @Inject constructor(
     private fun isValidEmail(email: String): Boolean =
         android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
-
