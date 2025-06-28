@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.regex.Pattern
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 @HiltViewModel
 class TicketTableViewModel @Inject constructor(
@@ -55,58 +56,66 @@ class TicketTableViewModel @Inject constructor(
     }
 
     private fun processText(text: String) {
-        val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
-        val products = mutableListOf<TicketProduct>()
-        var total: Double? = null
+        try {
+            val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
+            val products = mutableListOf<TicketProduct>()
+            var total: Double? = null
 
-        // Palabras clave que NO deben considerarse productos
-        val excludeKeywords = listOf(
-            "TOTAL",
-            "NETO",
-            "IVA",
-            "BRUTO",
-            "A PAGAR",
-            "PAGO",
-            "OPERACION",
-            "CONTACTLESS",
-            "EUR"
-        )
+            // Palabras clave que NO deben considerarse productos
+            val excludeKeywords = listOf(
+                "TOTAL",
+                "NETO",
+                "IVA",
+                "BRUTO",
+                "A PAGAR",
+                "PAGO",
+                "OPERACION",
+                "CONTACTLESS",
+                "EUR"
+            )
 
-        // Regex para productos tipo "nombre precio"
-        val productSimpleRegex = Regex("^([\\w\\s.,\\-]+?)\\s+(\\d+[\\.,]\\d{2})$")
+            // Regex para productos tipo "nombre precio"
+            val productSimpleRegex = Regex("^([\\w\\s.,\\-]+?)\\s+(\\d+[\\.,]\\d{2})$")
 
-        for (line in lines) {
-            // Ignorar líneas que contengan palabras clave
-            if (excludeKeywords.any { line.uppercase().contains(it) }) continue
+            for (line in lines) {
+                // Ignorar líneas que contengan palabras clave
+                if (excludeKeywords.any { line.uppercase().contains(it) }) continue
 
-            val simpleMatch = productSimpleRegex.matchEntire(line)
-            if (simpleMatch != null) {
-                val (name, price) = simpleMatch.destructured
-                products.add(
-                    TicketProduct(
-                        quantity = 1,
-                        name = name.trim(),
-                        unitPrice = price.replace(",", ".").toDoubleOrNull() ?: 0.0
+                val simpleMatch = productSimpleRegex.matchEntire(line)
+                if (simpleMatch != null) {
+                    val (name, price) = simpleMatch.destructured
+                    products.add(
+                        TicketProduct(
+                            quantity = 1,
+                            name = name.trim(),
+                            unitPrice = price.replace(",", ".").toDoubleOrNull() ?: 0.0
+                        )
                     )
-                )
-                continue
-            }
+                    continue
+                }
 
-            // Buscar total
-            if (line.uppercase().contains("A PAGAR")) {
-                val priceRegex = Regex("(\\d+[\\.,]\\d{2})")
-                priceRegex.find(line)?.groupValues?.get(1)?.let {
-                    total = it.replace(",", ".").toDoubleOrNull()
+                // Buscar total
+                if (line.uppercase().contains("A PAGAR")) {
+                    val priceRegex = Regex("(\\d+[\\.,]\\d{2})")
+                    priceRegex.find(line)?.groupValues?.get(1)?.let {
+                        total = it.replace(",", ".").toDoubleOrNull()
+                    }
                 }
             }
-        }
 
-        if (products.isEmpty()) {
-            products.add(TicketProduct())
-        }
+            if (products.isEmpty()) {
+                products.add(TicketProduct())
+            }
 
-        _products.value = products
-        _totalExtracted.value = total
+            _products.value = products
+            _totalExtracted.value = total
+        } catch (e: Exception) {
+            val msg = "TicketTableViewModel.processText: Error procesando texto del ticket: ${e.localizedMessage}"
+            FirebaseCrashlytics.getInstance().log(msg)
+            FirebaseCrashlytics.getInstance().recordException(e)
+            _products.value = listOf(TicketProduct())
+            _totalExtracted.value = null
+        }
     }
 
     fun onSaveProducts() {
@@ -117,14 +126,20 @@ class TicketTableViewModel @Inject constructor(
 
     fun onSaveTicketAndProducts(onTicketSaved: (Long) -> Unit) {
         viewModelScope.launch {
-            val ticket = TicketEntity(
-                storeName = "Tienda genérica",
-                date = System.currentTimeMillis(),
-                totalAmount = _totalExtracted.value ?: _products.value.sumOf { it.quantity * it.unitPrice }
-            )
-            val ticketId = saveTicketWithProductsUseCase(ticket, _products.value)
-            _showSavedAlert.value = true
-            onTicketSaved(ticketId)
+            try {
+                val ticket = TicketEntity(
+                    storeName = "Tienda genérica",
+                    date = System.currentTimeMillis(),
+                    totalAmount = _totalExtracted.value ?: _products.value.sumOf { it.quantity * it.unitPrice }
+                )
+                val ticketId = saveTicketWithProductsUseCase(ticket, _products.value)
+                _showSavedAlert.value = true
+                onTicketSaved(ticketId)
+            } catch (e: Exception) {
+                val msg = "TicketTableViewModel.onSaveTicketAndProducts: Error guardando ticket/productos: ${e.localizedMessage}"
+                FirebaseCrashlytics.getInstance().log(msg)
+                FirebaseCrashlytics.getInstance().recordException(e)
+            }
         }
     }
 

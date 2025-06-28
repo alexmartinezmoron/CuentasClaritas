@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 @HiltViewModel
 class UserRegistrationViewModel @Inject constructor(
@@ -23,6 +24,11 @@ class UserRegistrationViewModel @Inject constructor(
     private val ticketId: Long = savedStateHandle.get<Long>("ticketId") ?: -1L
 
     fun onUserNameChange(index: Int, name: String) {
+        if (index !in _users.value.indices) {
+            val msg = "UserRegistrationViewModel.onUserNameChange: Índice fuera de rango ($index) para usuarios (${_users.value.size})"
+            FirebaseCrashlytics.getInstance().log(msg)
+            return
+        }
         _users.value = _users.value.toMutableList().also { it[index] = name }
     }
 
@@ -35,15 +41,23 @@ class UserRegistrationViewModel @Inject constructor(
         if (index in list.indices) {
             list.removeAt(index)
             _users.value = if (list.isEmpty()) listOf("") else list
+        } else {
+            val msg = "UserRegistrationViewModel.onRemoveUser: Índice fuera de rango ($index) para usuarios (${list.size})"
+            FirebaseCrashlytics.getInstance().log(msg)
         }
     }
 
     fun saveUsers(onSaved: () -> Unit) {
         viewModelScope.launch {
-            val userEntities = _users.value.filter { it.isNotBlank() }.map { UserEntity(name = it) }
-            userEntities.forEach { userRepository.insertUser(it) }
-            onSaved()
+            try {
+                val userEntities = _users.value.filter { it.isNotBlank() }.map { UserEntity(name = it) }
+                userEntities.forEach { userRepository.insertUser(it) }
+                onSaved()
+            } catch (e: Exception) {
+                val msg = "UserRegistrationViewModel.saveUsers: Error al guardar usuarios: ${e.localizedMessage}"
+                FirebaseCrashlytics.getInstance().log(msg)
+                FirebaseCrashlytics.getInstance().recordException(e)
+            }
         }
     }
 }
-

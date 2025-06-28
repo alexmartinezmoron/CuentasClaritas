@@ -1,19 +1,26 @@
 package com.amartinez.cuentasclaritas.presentation.scanticket
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
+import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ScanTicketViewModel @Inject constructor() : ViewModel() {
+class ScanTicketViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
+) : ViewModel() {
 
     private val _capturedImage = MutableStateFlow<Bitmap?>(null)
     val capturedImage: StateFlow<Bitmap?> = _capturedImage
@@ -40,6 +47,24 @@ class ScanTicketViewModel @Inject constructor() : ViewModel() {
                     }
             } catch (e: Exception) {
                 _recognizedText.value = "Error al procesar imagen: ${e.localizedMessage}"
+            }
+        }
+    }
+
+    fun onImageCaptured(imageUri: Uri) {
+        viewModelScope.launch {
+            try {
+                val bitmap = MediaStore.Images.Media.getBitmap(
+                    appContext.contentResolver,
+                    imageUri
+                )
+                _capturedImage.value = bitmap
+                recognizeTextFromBitmap(bitmap)
+            } catch (e: Exception) {
+                val msg = "ScanTicketViewModel.onImageCaptured: Error procesando imagen: ${e.localizedMessage}"
+                FirebaseCrashlytics.getInstance().log(msg)
+                FirebaseCrashlytics.getInstance().recordException(e)
+                _recognizedText.value = null
             }
         }
     }

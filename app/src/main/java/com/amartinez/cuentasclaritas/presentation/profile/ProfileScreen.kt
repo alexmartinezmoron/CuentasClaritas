@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.launch
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -122,6 +123,8 @@ fun ProfileScreen(navController: NavController) {
                             // El estado de autenticación en MainAppScreen controlará la UI, no navegamos manualmente
                         } catch (e: Exception) {
                             Log.e("ProfileScreen", "Error al cerrar sesión", e)
+                            FirebaseCrashlytics.getInstance().log("ProfileScreen: Error al cerrar sesión. Exception: ${e.localizedMessage}")
+                            FirebaseCrashlytics.getInstance().recordException(e)
                             isLoading = false
                             snackbarMessage = context.getString(R.string.logout_error)
                         }

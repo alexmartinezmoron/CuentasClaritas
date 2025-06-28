@@ -28,6 +28,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.launch
 
 @Composable
@@ -62,15 +63,20 @@ fun AuthScreen(
                             onAuthSuccess()
                         } else {
                             Log.e("AuthScreen", "Firebase Auth con Google: Error", authResult.exception)
+                            FirebaseCrashlytics.getInstance().log("AuthScreen: Error en signInWithCredential. Exception: ${authResult.exception?.localizedMessage}")
+                            authResult.exception?.let { FirebaseCrashlytics.getInstance().recordException(it) }
                             viewModel.clearError()
                         }
                     }
             } else {
                 Log.e("AuthScreen", "Cuenta de Google nula")
+                FirebaseCrashlytics.getInstance().log("AuthScreen: Cuenta de Google nula en GoogleSignInLauncher")
                 viewModel.clearError()
             }
         } catch (e: Exception) {
             Log.e("AuthScreen", "Error en Google Sign-In", e)
+            FirebaseCrashlytics.getInstance().log("AuthScreen: Excepción en GoogleSignInLauncher: ${e.localizedMessage}")
+            FirebaseCrashlytics.getInstance().recordException(e)
             viewModel.clearError()
         }
     }
