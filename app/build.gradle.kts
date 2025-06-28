@@ -77,7 +77,7 @@ dependencies {
     implementation(libs.accompanist.permissions)
 
     // ML Kit Text Recognition
-    implementation("com.google.mlkit:text-recognition:16.0.0")
+    implementation(libs.mlkit.text.recognition)
 
     //Firebase
     implementation(platform(libs.firebase.bom))
@@ -87,7 +87,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ai)
     // Google Identity Services para One Tap Sign-In
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation(libs.play.services.auth)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
