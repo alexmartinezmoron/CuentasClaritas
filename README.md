@@ -27,13 +27,18 @@ El objetivo principal de CuentasClaritas es ofrecer una herramienta intuitiva y 
   - Edición posterior del reparto.
 - Almacenamiento local de tickets procesados para consulta futura.
 - Interfaz de usuario moderna, minimalista y accesible.
+- **Integración con Firebase:**
+  - Autenticación de usuarios con Firebase Auth.
+  - Reporte de errores con Firebase Crashlytics.
+  - Análisis de comportamiento con Google Analytics for Firebase.
+  - Almacenamiento en la nube de tickets u otros datos con Firebase Cloud Storage / Firestore.
 
 ## Arquitectura y Tecnologías
 El proyecto está construido siguiendo los principios de Clean Architecture, separando las responsabilidades en tres capas principales:
 
 - **Presentation:** Interfaz de usuario (Jetpack Compose) y lógica de presentación (ViewModels).
 - **Domain:** Casos de uso y lógica de negocio central, independiente de Android y frameworks.
-- **Data:** Implementación de repositorios y fuentes de datos (Room, ML Kit, CameraX).
+- **Data:** Implementación de repositorios y fuentes de datos (Room, ML Kit, CameraX, Firebase).
 
 ### Stack Tecnológico Principal
 - **Lenguaje:** Kotlin
@@ -43,6 +48,7 @@ El proyecto está construido siguiendo los principios de Clean Architecture, sep
 - **Cámara:** CameraX
 - **OCR:** Google ML Kit Text Recognition
 - **Base de Datos Local:** Room (con migraciones reales y relaciones entre tickets, productos y usuarios)
+- **Servicios en la Nube:** Firebase (Auth, Crashlytics, Analytics, Cloud Firestore / Storage)
 - **SDK Mínimo:** API 24 (Android 7.0 Nougat)
 
 ## Principios de Desarrollo
@@ -55,4 +61,5 @@ El proyecto está construido siguiendo los principios de Clean Architecture, sep
 ## Estado del Proyecto
 - El flujo de reparto de productos entre usuarios está implementado y validado.
 - Migraciones reales de Room implementadas para mantener la integridad de los datos.
+- Firebase Auth, Crashlytics, Analytics y Firestore/Storage ya están integrados y funcionales.
 - El proyecto evoluciona activamente y este README se actualizará a medida que se añadan nuevas funcionalidades.
