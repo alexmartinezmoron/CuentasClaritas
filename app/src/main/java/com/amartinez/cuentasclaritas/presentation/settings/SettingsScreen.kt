@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.Button
 // import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
@@ -27,6 +29,12 @@ fun SettingsScreen(
             text = "Ajustes",
             style = MaterialTheme.typography.headlineMedium
         )
+
+        Spacer(modifier = Modifier.padding(16.dp))
+
+        Button(onClick = { throw RuntimeException("Excepción de prueba") }) {
+            Text("Probar Excepción")
+        }
         // TODO: Implement settings UI
     }
 }

@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.crashlytics)
     kotlin("kapt")
 }
 
@@ -76,6 +78,10 @@ dependencies {
 
     // ML Kit Text Recognition
     implementation("com.google.mlkit:text-recognition:16.0.0")
+
+    //Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
