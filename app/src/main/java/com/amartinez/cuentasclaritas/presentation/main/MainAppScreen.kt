@@ -21,6 +21,7 @@ import com.amartinez.cuentasclaritas.presentation.settings.SettingsScreen
 import com.amartinez.cuentasclaritas.presentation.ticketlist.TicketListScreen
 import com.amartinez.cuentasclaritas.presentation.tickettable.TicketTableScreen
 import com.amartinez.cuentasclaritas.presentation.tickettable.TicketTableViewModel
+import com.amartinez.cuentasclaritas.presentation.profile.ProfileScreen
 import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 
@@ -153,6 +154,9 @@ fun AppNavHost(
         }
         composable(AppScreen.Settings.route) {
             SettingsScreen()
+        }
+        composable(AppScreen.Profile.route) {
+            ProfileScreen(navController)
         }
         composable(
             route = AppScreen.TicketTable.route,

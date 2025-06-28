@@ -3,6 +3,7 @@ package com.amartinez.cuentasclaritas.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -36,6 +37,12 @@ sealed class AppScreen(
         icon = Icons.Filled.Settings
     )
 
+    object Profile : AppScreen(
+        route = "profile",
+        title = "Mi Perfil",
+        icon = Icons.Filled.Person
+    )
+
     object TicketText : AppScreen(
         route = "ticket_text/{ticketText}",
         title = "Texto del Ticket",
@@ -55,6 +62,7 @@ sealed class AppScreen(
 val drawerItems = listOf(
     AppScreen.ScanTicket,
     AppScreen.TicketList,
-    AppScreen.Settings
+    AppScreen.Settings,
+    AppScreen.Profile
     // No agregamos TicketText ni TicketTable aquí porque no son parte del drawer
 )
