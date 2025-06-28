@@ -34,6 +34,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import com.amartinez.cuentasclaritas.R
 
 @Composable
 fun TicketTableScreen(
@@ -51,12 +53,11 @@ fun TicketTableScreen(
     val scope = rememberCoroutineScope()
 
     // Mostrar Snackbar cuando showSavedAlert sea true
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(showSavedAlert) {
         if (showSavedAlert) {
-            scope.launch {
-                snackbarHostState.showSnackbar("Guardado correctamente")
-                onDismissSavedAlert()
-            }
+            snackbarMessage = R.string.ticket_table_saved.toString()
+            onDismissSavedAlert()
         }
     }
 
@@ -67,18 +68,17 @@ fun TicketTableScreen(
                 .padding(16.dp)
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("Productos del ticket:", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                Text(stringResource(id = R.string.ticket_table_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
             }
             Spacer(modifier = Modifier.height(8.dp))
-
             // Encabezados de la tabla
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Cant.", modifier = Modifier.width(60.dp), style = MaterialTheme.typography.labelMedium)
-                Text("Producto", modifier = Modifier.weight(1f), style = MaterialTheme.typography.labelMedium)
-                Text("P. Unit", modifier = Modifier.width(80.dp), style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(id = R.string.ticket_table_add_product), modifier = Modifier.width(60.dp), style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(id = R.string.ticket_table_product), modifier = Modifier.weight(1f), style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(id = R.string.ticket_table_remove_product), modifier = Modifier.width(80.dp), style = MaterialTheme.typography.labelMedium)
             }
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -148,7 +148,7 @@ fun TicketTableScreen(
                 ) {
                     Icon(Icons.Default.CameraAlt, contentDescription = "Volver a escanear")
                     Spacer(Modifier.width(8.dp))
-                    Text("Volver a escanear")
+                    Text(stringResource(id = R.string.ticket_table_back))
                 }
             }
         }
@@ -156,6 +156,16 @@ fun TicketTableScreen(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.TopCenter) // Cambiado a la parte superior
         )
+
+        // Mostrar el Snackbar si hay un mensaje
+        if (snackbarMessage != null) {
+            val messageId = snackbarMessage!!.toInt()
+            val message = stringResource(id = messageId)
+            LaunchedEffect(messageId) {
+                snackbarHostState.showSnackbar(message)
+                snackbarMessage = null
+            }
+        }
     }
 }
 

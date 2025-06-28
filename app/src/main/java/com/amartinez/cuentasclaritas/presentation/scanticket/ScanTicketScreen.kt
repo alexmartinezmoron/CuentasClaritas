@@ -26,13 +26,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.amartinez.cuentasclaritas.R
 
+// ScanTicketScreen
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ScanTicketScreen(
@@ -90,7 +93,7 @@ fun ScanTicketScreen(
                 galleryPermissionState.launchMultiplePermissionRequest()
             }
         }) {
-            Text("Seleccionar de galería")
+            Text(stringResource(id = R.string.scan_ticket_gallery))
         }
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = {
@@ -105,7 +108,7 @@ fun ScanTicketScreen(
                 cameraPermissionState.launchPermissionRequest()
             }
         }) {
-            Text("Tomar foto")
+            Text(stringResource(id = R.string.scan_ticket_camera))
         }
     }
 }

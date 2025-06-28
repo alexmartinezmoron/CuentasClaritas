@@ -10,6 +10,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.amartinez.cuentasclaritas.R
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -21,7 +23,7 @@ fun UserRegistrationScreen(
     onSaveUsers: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Usuarios del ticket", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(id = R.string.user_registration_title), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(users.size) { index ->
@@ -29,11 +31,11 @@ fun UserRegistrationScreen(
                     OutlinedTextField(
                         value = users[index],
                         onValueChange = { onUserNameChange(index, it) },
-                        label = { Text("Nombre de usuario") },
+                        label = { Text(stringResource(id = R.string.user_registration_name_hint)) },
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(onClick = { onRemoveUser(index) }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar usuario")
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.user_registration_remove))
                     }
                 }
                 Spacer(Modifier.height(8.dp))
@@ -41,9 +43,9 @@ fun UserRegistrationScreen(
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             Button(onClick = onAddUser) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir usuario")
+                Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.user_registration_add))
                 Spacer(Modifier.width(8.dp))
-                Text("Añadir usuario")
+                Text(stringResource(id = R.string.user_registration_add))
             }
         }
         Spacer(Modifier.height(16.dp))
@@ -52,7 +54,7 @@ fun UserRegistrationScreen(
             modifier = Modifier.fillMaxWidth(),
             enabled = users.all { it.isNotBlank() && users.size > 0 }
         ) {
-            Text("Guardar usuarios")
+            Text(stringResource(id = R.string.user_registration_save))
         }
     }
 }

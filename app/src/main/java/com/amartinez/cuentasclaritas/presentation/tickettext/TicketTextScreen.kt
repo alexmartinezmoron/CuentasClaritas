@@ -11,8 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.amartinez.cuentasclaritas.R
 
 @Composable
 fun TicketTextScreen(
@@ -27,7 +29,7 @@ fun TicketTextScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Texto extraído:",
+            text = stringResource(id = R.string.ticket_text_title),
             style = androidx.compose.material3.MaterialTheme.typography.titleMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -38,8 +40,7 @@ fun TicketTextScreen(
         )
         Spacer(modifier = Modifier.height(32.dp))
         Button(onClick = onBackToScan) {
-            Text("Volver a escanear")
+            Text(stringResource(id = R.string.ticket_text_copy))
         }
     }
 }
-

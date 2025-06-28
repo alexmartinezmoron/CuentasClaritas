@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ProfileScreen -->
+    <string name="app_name">Cuentas Claritas</string>
+    <string name="profile_title">My Profile</string>
+    <string name="anonymous_user">Anonymous user</string>
+    <string name="logout">Log out</string>
+    <string name="logout_error">Error logging out. Please try again.</string>
+    <string name="language">Language</string>
+    <string name="spanish">Spanish</string>
+    <string name="english">English</string>
+    <string name="language_changed">Language changed</string>
+    <string name="restart_required">Restart the app to apply the change.</string>
+
+    <!-- ScanTicketScreen -->
+    <string name="scan_ticket_title">Scan Ticket</string>
+    <string name="scan_ticket_camera">Use camera</string>
+    <string name="scan_ticket_gallery">Select from gallery</string>
+    <string name="scan_ticket_permission_camera">Camera permission required</string>
+    <string name="scan_ticket_permission_gallery">Gallery permission required</string>
+    <string name="scan_ticket_processing">Processing image...</string>
+    <string name="scan_ticket_error">Error processing ticket</string>
+
+    <!-- TicketListScreen -->
+    <string name="ticket_list_title">My Tickets</string>
+    <string name="ticket_list_empty">No tickets available</string>
+    <string name="ticket_list_add">Add ticket</string>
+    <string name="ticket_list_delete">Delete</string>
+    <string name="ticket_list_confirm_delete">Delete this ticket?</string>
+    <string name="ticket_list_deleted">Ticket deleted</string>
+
+    <!-- TicketTableScreen -->
+    <string name="ticket_table_title">Ticket Products</string>
+    <string name="ticket_table_add_product">Add product</string>
+    <string name="ticket_table_remove_product">Remove product</string>
+    <string name="ticket_table_save">Save</string>
+    <string name="ticket_table_total">Total</string>
+    <string name="ticket_table_saved">Products saved</string>
+    <string name="ticket_table_back">Back</string>
+
+    <!-- TicketTextScreen -->
+    <string name="ticket_text_title">Ticket Text</string>
+    <string name="ticket_text_copy">Copy text</string>
+    <string name="ticket_text_copied">Text copied</string>
+
+    <!-- SettingsScreen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_dark_mode">Dark mode</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_save">Save settings</string>
+    <string name="settings_saved">Settings saved</string>
+
+    <!-- UserRegistrationScreen -->
+    <string name="user_registration_title">User Registration</string>
+    <string name="user_registration_add">Add user</string>
+    <string name="user_registration_remove">Remove user</string>
+    <string name="user_registration_save">Save users</string>
+    <string name="user_registration_name_hint">User name</string>
+    <string name="user_registration_saved">Users saved</string>
+
+    <!-- ProductAssignmentScreen -->
+    <string name="product_assignment_title">Assign Products</string>
+    <string name="product_assignment_assign">Assign</string>
+    <string name="product_assignment_save">Save assignments</string>
+    <string name="product_assignment_saved">Assignments saved</string>
+    <string name="product_assignment_user">User</string>
+    <string name="product_assignment_product">Product</string>
+    <string name="product_assignment_select_user">Select a user</string>
+    <string name="product_assignment_select_product">Select a product</string>
+</resources>
