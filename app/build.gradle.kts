@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.ai)
     // Google Identity Services para One Tap Sign-In
     implementation("com.google.android.gms:play-services-auth:21.3.0")
 
